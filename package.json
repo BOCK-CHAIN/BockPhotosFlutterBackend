@@ -1,0 +1,46 @@
+{
+  "name": "hynorvixx_backend",
+  "version": "1.0.0",
+  "description": "A modern Node.js backend API for photo gallery management with JWT authentication",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test:setup": "node test-setup.js",
+    "test:db": "node test-db-connection.js",
+    "build": "npm install --production",
+    "deploy": "bash deploy.sh",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop hynorvixx-backend",
+    "pm2:restart": "pm2 restart hynorvixx-backend",
+    "pm2:logs": "pm2 logs hynorvixx-backend",
+    "pm2:status": "pm2 status"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "@aws-sdk/s3-request-presigner": "^3.450.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "photo-gallery",
+    "api",
+    "postgresql",
+    "jwt",
+    "authentication"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
