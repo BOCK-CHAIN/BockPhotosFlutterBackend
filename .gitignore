@@ -1,1 +1,14 @@
+
+node_modules/
+
+logs
+*.log
+npm-debug.log*
+
 .env
+.env.* 
+
+.DS_Store
+Thumbs.db
+
+yarn.lock
