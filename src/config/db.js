@@ -6,7 +6,7 @@ const { Pool } = pg;
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
   ssl: env.NODE_ENV === 'production' ? { 
-    rejectUnauthorized: false,
+    rejectUnauthorized: false, // Allow self-signed certificates (common with RDS)
     sslmode: 'require'
   } : false,
   max: env.DB_POOL_SIZE,

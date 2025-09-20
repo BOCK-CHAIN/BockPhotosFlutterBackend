@@ -36,10 +36,10 @@ async function testConnection() {
     connectionString: dbUrl,
     connectionTimeoutMillis: 15000, // Increased for RDS
     idleTimeoutMillis: 30000,
-    ssl: process.env.NODE_ENV === 'production' ? { 
-      rejectUnauthorized: false,
+    ssl: {
+      rejectUnauthorized: false, // Allow self-signed certificates (common with RDS)
       sslmode: 'require'
-    } : false
+    }
   });
 
   try {
@@ -101,11 +101,12 @@ async function testConnection() {
       console.log('   → Check network connectivity between EC2 and RDS');
       console.log('   → Verify security groups allow port 5432');
       console.log('   → Check if RDS is in the same VPC as your EC2');
-    } else if (error.message.includes('SSL')) {
-      console.log('\n💡 RDS Troubleshooting:');
-      console.log('   → SSL connection issue with RDS');
+    } else if (error.message.includes('SSL') || error.message.includes('certificate')) {
+      console.log('\n💡 RDS SSL Troubleshooting:');
+      console.log('   → SSL certificate issue with RDS');
       console.log('   → Ensure ?sslmode=require is in your DATABASE_URL');
-      console.log('   → Check if RDS SSL certificate is valid');
+      console.log('   → The connection is configured to accept self-signed certificates');
+      console.log('   → If this persists, check your RDS SSL configuration');
     } else if (error.code === 'ECONNRESET') {
       console.log('\n💡 RDS Troubleshooting:');
       console.log('   → Connection reset by RDS server');
