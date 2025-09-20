@@ -99,7 +99,52 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Grant permissions (adjust as needed for your Neon setup)
--- These are example permissions - adjust based on your actual database user setup
+-- Grant permissions for RDS setup
+-- These permissions should be granted to your application user
+-- Replace 'your_app_user' with your actual application database user
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO your_app_user;
 -- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO your_app_user;
+
+-- RDS-specific optimizations
+-- Enable query statistics collection
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+-- Create function to get database statistics
+CREATE OR REPLACE FUNCTION get_db_stats()
+RETURNS TABLE(
+    total_connections INTEGER,
+    active_connections INTEGER,
+    database_size TEXT,
+    uptime INTERVAL
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        (SELECT setting::INTEGER FROM pg_settings WHERE name = 'max_connections') as total_connections,
+        (SELECT count(*)::INTEGER FROM pg_stat_activity WHERE state = 'active') as active_connections,
+        pg_size_pretty(pg_database_size(current_database())) as database_size,
+        (SELECT now() - pg_postmaster_start_time()) as uptime;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create function to monitor slow queries
+CREATE OR REPLACE FUNCTION get_slow_queries()
+RETURNS TABLE(
+    query TEXT,
+    calls BIGINT,
+    total_time DOUBLE PRECISION,
+    mean_time DOUBLE PRECISION
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        query,
+        calls,
+        total_time,
+        mean_time
+    FROM pg_stat_statements 
+    WHERE mean_time > 1000  -- Queries taking more than 1 second on average
+    ORDER BY mean_time DESC
+    LIMIT 10;
+END;
+$$ LANGUAGE plpgsql;

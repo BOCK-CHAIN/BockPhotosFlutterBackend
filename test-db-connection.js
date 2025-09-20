@@ -34,8 +34,12 @@ if (dbUrl) {
 async function testConnection() {
   const pool = new Pool({
     connectionString: dbUrl,
-    connectionTimeoutMillis: 10000,
-    idleTimeoutMillis: 30000
+    connectionTimeoutMillis: 15000, // Increased for RDS
+    idleTimeoutMillis: 30000,
+    ssl: process.env.NODE_ENV === 'production' ? { 
+      rejectUnauthorized: false,
+      sslmode: 'require'
+    } : false
   });
 
   try {
@@ -68,38 +72,45 @@ async function testConnection() {
   } catch (error) {
     console.error('\n❌ Connection failed:', error.message);
     
-    // Provide specific troubleshooting tips
+    // Provide specific troubleshooting tips for RDS
     if (error.code === 'ECONNREFUSED') {
-      console.log('\n💡 Troubleshooting:');
-      console.log('   → PostgreSQL server is not running');
-      console.log('   → Check if PostgreSQL service is started');
-      console.log('   → Verify the port number in your connection string');
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → RDS instance is not running or not accessible');
+      console.log('   → Check RDS instance status in AWS Console');
+      console.log('   → Verify security groups allow connections from your IP/EC2');
+      console.log('   → Check if RDS instance is in the correct VPC/subnet');
     } else if (error.code === 'ENOTFOUND') {
-      console.log('\n💡 Troubleshooting:');
-      console.log('   → Database host not found');
-      console.log('   → Check your DATABASE_URL configuration');
-      console.log('   → Verify the hostname/IP address');
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → RDS endpoint not found');
+      console.log('   → Check your RDS endpoint in DATABASE_URL');
+      console.log('   → Verify the endpoint format: your-db.region.rds.amazonaws.com');
     } else if (error.code === '28P01') {
-      console.log('\n💡 Troubleshooting:');
+      console.log('\n💡 RDS Troubleshooting:');
       console.log('   → Authentication failed');
-      console.log('   → Check username and password');
-      console.log('   → Verify user has access to the database');
+      console.log('   → Check username and password in DATABASE_URL');
+      console.log('   → Verify user exists in RDS instance');
+      console.log('   → Check if user has proper permissions');
     } else if (error.code === '3D000') {
-      console.log('\n💡 Troubleshooting:');
-      console.log('   → Database does not exist');
-      console.log('   → Create the database first');
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → Database does not exist in RDS');
+      console.log('   → Create the database in RDS instance');
       console.log('   → Check the database name in your connection string');
     } else if (error.message.includes('timeout')) {
-      console.log('\n💡 Troubleshooting:');
-      console.log('   → Connection timeout');
-      console.log('   → Check network connectivity');
-      console.log('   → Verify firewall settings');
-      console.log('   → Try increasing connection timeout');
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → Connection timeout to RDS');
+      console.log('   → Check network connectivity between EC2 and RDS');
+      console.log('   → Verify security groups allow port 5432');
+      console.log('   → Check if RDS is in the same VPC as your EC2');
     } else if (error.message.includes('SSL')) {
-      console.log('\n💡 Troubleshooting:');
-      console.log('   → SSL connection issue');
-      console.log('   → Try adding ?sslmode=require to your DATABASE_URL');
-      console.log('   → Or use ?sslmode=disable for local development');
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → SSL connection issue with RDS');
+      console.log('   → Ensure ?sslmode=require is in your DATABASE_URL');
+      console.log('   → Check if RDS SSL certificate is valid');
+    } else if (error.code === 'ECONNRESET') {
+      console.log('\n💡 RDS Troubleshooting:');
+      console.log('   → Connection reset by RDS server');
+      console.log('   → Check RDS instance health and performance');
+      console.log('   → Verify network stability between EC2 and RDS');
     }
     
     await pool.end();

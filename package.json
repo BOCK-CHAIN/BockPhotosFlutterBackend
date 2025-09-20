@@ -9,6 +9,7 @@
     "dev": "nodemon src/server.js",
     "test:setup": "node test-setup.js",
     "test:db": "node test-db-connection.js",
+    "migrate:rds": "node migrate-to-rds.js",
     "build": "npm install --production",
     "deploy": "bash deploy.sh",
     "pm2:start": "pm2 start ecosystem.config.js --env production",

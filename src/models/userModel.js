@@ -1,5 +1,8 @@
 import { pool } from '../config/db.js';
 
+// RDS-specific query timeout (in milliseconds)
+const QUERY_TIMEOUT = 30000;
+
 export const userModel = {
   // Create a new user
   async createUser(email, passwordHash) {
@@ -8,8 +11,16 @@ export const userModel = {
       VALUES ($1, $2) 
       RETURNING id, email, created_at, is_active
     `;
-    const result = await pool.query(query, [email, passwordHash]);
-    return result.rows[0];
+    try {
+      const result = await pool.query(query, [email, passwordHash]);
+      return result.rows[0];
+    } catch (error) {
+      // Handle RDS-specific errors
+      if (error.code === '23505') { // Unique violation
+        throw new Error('User with this email already exists');
+      }
+      throw error;
+    }
   },
 
   // Find user by email

@@ -12,6 +12,9 @@ export const env = {
   
   // Database configuration
   DATABASE_URL: process.env.DATABASE_URL,
+  DB_POOL_SIZE: parseInt(process.env.DB_POOL_SIZE) || 20,
+  DB_CONNECTION_TIMEOUT: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 10000,
+  DB_IDLE_TIMEOUT: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000,
   
   // JWT configuration
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET,

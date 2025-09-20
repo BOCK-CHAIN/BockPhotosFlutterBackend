@@ -5,12 +5,18 @@ const { Pool } = pg;
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Reduced from 2000 to 10000ms
-  maxUses: 7500, // Close connections after 7500 queries
-  allowExitOnIdle: true
+  ssl: env.NODE_ENV === 'production' ? { 
+    rejectUnauthorized: false,
+    sslmode: 'require'
+  } : false,
+  max: env.DB_POOL_SIZE,
+  idleTimeoutMillis: env.DB_IDLE_TIMEOUT,
+  connectionTimeoutMillis: env.DB_CONNECTION_TIMEOUT,
+  maxUses: 7500,
+  allowExitOnIdle: true,
+  // RDS-specific optimizations
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 0
 });
 
 // Test database connection with better error handling
@@ -31,19 +37,25 @@ export const testConnection = async () => {
     // Provide more specific error information
     if (error.code === 'ECONNREFUSED') {
       console.error('   → Database server is not running or not accessible');
-      console.error('   → Check if PostgreSQL is running and the port is correct');
+      console.error('   → Check if RDS instance is running and security groups allow connections');
     } else if (error.code === 'ENOTFOUND') {
       console.error('   → Database host not found');
-      console.error('   → Check your DATABASE_URL configuration');
+      console.error('   → Check your RDS endpoint in DATABASE_URL configuration');
     } else if (error.code === '28P01') {
       console.error('   → Authentication failed');
       console.error('   → Check username and password in DATABASE_URL');
     } else if (error.code === '3D000') {
       console.error('   → Database does not exist');
-      console.error('   → Create the database or check the database name');
+      console.error('   → Create the database in RDS or check the database name');
     } else if (error.message.includes('timeout')) {
       console.error('   → Connection timeout');
-      console.error('   → Check network connectivity and database server status');
+      console.error('   → Check network connectivity and RDS instance status');
+    } else if (error.code === 'ECONNRESET') {
+      console.error('   → Connection reset by RDS server');
+      console.error('   → Check RDS instance health and network connectivity');
+    } else if (error.message.includes('SSL')) {
+      console.error('   → SSL connection issue');
+      console.error('   → Check SSL configuration for RDS connection');
     }
     
     throw error;

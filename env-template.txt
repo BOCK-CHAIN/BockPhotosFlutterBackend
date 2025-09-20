@@ -15,10 +15,20 @@ PORT=3000
 # DATABASE CONFIGURATION
 # =============================================================================
 
-# PostgreSQL connection string
-# Format: postgresql://username:password@host:port/database
-# Example for Neon: postgresql://user:pass@ep-xxx.us-east-1.aws.neon.tech/dbname?sslmode=require
-DATABASE_URL=postgresql://username:password@localhost:5432/database_name
+# PostgreSQL connection string for AWS RDS
+# Format: postgresql://username:password@host:port/database?sslmode=require
+# Example for RDS: postgresql://user:pass@your-rds-endpoint.region.rds.amazonaws.com:5432/dbname?sslmode=require
+DATABASE_URL=postgresql://username:password@your-rds-endpoint.region.rds.amazonaws.com:5432/database_name?sslmode=require
+
+# RDS-specific configuration (optional - for advanced connection tuning)
+# Connection pool size (default: 20)
+DB_POOL_SIZE=20
+
+# Connection timeout in milliseconds (default: 10000)
+DB_CONNECTION_TIMEOUT=10000
+
+# Idle timeout in milliseconds (default: 30000)
+DB_IDLE_TIMEOUT=30000
 
 # =============================================================================
 # JWT CONFIGURATION
@@ -82,14 +92,14 @@ S3_BUCKET=your-photo-upload-bucket
 
 # NODE_ENV=development
 # PORT=3000
-# DATABASE_URL=postgresql://user:pass@localhost:5432/hynorvixx
-# JWT_ACCESS_SECRET=1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
-# JWT_REFRESH_SECRET=fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321
+# DATABASE_URL=
+# JWT_ACCESS_SECRET=
+# JWT_REFRESH_SECRET=
 # JWT_ACCESS_EXPIRES_IN=15m
 # JWT_REFRESH_EXPIRES_IN=7d
 # CORS_ORIGIN=http://localhost:3000
 # BCRYPT_ROUNDS=10
-# AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-# AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# AWS_ACCESS_KEY_ID=
+# AWS_SECRET_ACCESS_KEY=
 # AWS_REGION=us-east-1
-# S3_BUCKET=my-photo-gallery
+# S3_BUCKET=

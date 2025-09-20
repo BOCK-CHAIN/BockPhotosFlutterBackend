@@ -10,7 +10,11 @@ module.exports = {
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      // RDS-specific environment variables
+      DB_POOL_SIZE: 30,
+      DB_CONNECTION_TIMEOUT: 15000,
+      DB_IDLE_TIMEOUT: 60000
     },
     // Logging
     log_file: './logs/combined.log',

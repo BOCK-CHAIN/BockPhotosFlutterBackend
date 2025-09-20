@@ -15,11 +15,21 @@ PORT=3000
 # DATABASE CONFIGURATION
 # =============================================================================
 
-# PostgreSQL connection string for production
-# Use your RDS instance or external PostgreSQL service
-# Format: postgresql://username:password@host:port/database
-# Example for RDS: postgresql://user:pass@your-rds-endpoint.region.rds.amazonaws.com:5432/dbname
-DATABASE_URL=postgresql://username:password@your-database-host:5432/database_name
+# PostgreSQL connection string for AWS RDS production
+# Use your RDS instance endpoint
+# Format: postgresql://username:password@host:port/database?sslmode=require
+# Example for RDS: postgresql://user:pass@your-rds-endpoint.region.rds.amazonaws.com:5432/dbname?sslmode=require
+DATABASE_URL=postgresql://username:password@your-rds-endpoint.region.rds.amazonaws.com:5432/database_name?sslmode=require
+
+# RDS-specific configuration for production
+# Connection pool size (production: 30)
+DB_POOL_SIZE=30
+
+# Connection timeout in milliseconds (production: 15000)
+DB_CONNECTION_TIMEOUT=15000
+
+# Idle timeout in milliseconds (production: 60000)
+DB_IDLE_TIMEOUT=60000
 
 # =============================================================================
 # JWT CONFIGURATION
@@ -105,18 +115,18 @@ ENABLE_HEALTH_CHECKS=true
 
 # NODE_ENV=production
 # PORT=3000
-# DATABASE_URL=postgresql://prod_user:secure_password@prod-db.region.rds.amazonaws.com:5432/hynorvixx_prod
-# JWT_ACCESS_SECRET=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6
-# JWT_REFRESH_SECRET=f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1
+# DATABASE_URL=<YOUR_DB_URL>
+# JWT_ACCESS_SECRET=
+# JWT_REFRESH_SECRET=
 # JWT_ACCESS_EXPIRES_IN=15m
 # JWT_REFRESH_EXPIRES_IN=7d
 # CORS_ORIGIN=https://app.yourdomain.com
 # BCRYPT_ROUNDS=12
-# AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-# AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-# AWS_REGION=us-east-1
-# S3_BUCKET=hynorvixx-photos-prod
-# LOG_LEVEL=info
+# AWS_ACCESS_KEY_ID=
+# AWS_SECRET_ACCESS_KEY=
+# AWS_REGION=
+# S3_BUCKET=
+# LOG_LEVEL=
 # RATE_LIMIT_WINDOW_MS=60000
 # RATE_LIMIT_MAX_REQUESTS=100
 # ENABLE_SECURITY_HEADERS=true

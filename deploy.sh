@@ -71,6 +71,16 @@ mkdir -p logs
 print_status "Installing Node.js dependencies..."
 npm install --production
 
+# Test database connection before deployment
+print_status "Testing database connection..."
+if node test-db-connection.js; then
+    print_status "Database connection successful ✅"
+else
+    print_error "Database connection failed ❌"
+    print_error "Please check your RDS configuration in .env file"
+    exit 1
+fi
+
 # Set proper permissions
 print_status "Setting proper permissions..."
 chmod +x deploy.sh
@@ -108,7 +118,9 @@ echo "📋 Next steps:"
 echo "1. Update your domain in nginx.conf"
 echo "2. Configure SSL certificates (Let's Encrypt recommended)"
 echo "3. Update your .env file with production values"
-echo "4. Configure your database connection"
+echo "4. Configure your AWS RDS connection"
+echo "5. Ensure RDS security groups allow connections from your EC2 instance"
+echo "6. Run database migrations if needed"
 echo ""
 echo "🔧 Useful commands:"
 echo "  pm2 status                    - Check application status"
