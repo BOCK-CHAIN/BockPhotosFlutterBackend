@@ -137,32 +137,39 @@ export const getViewUrl = async (req, res, next) => {
 // List user's photos
 export const listPhotos = async (req, res, next) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: { message: 'Access token required', statusCode: 401 }
+      });
+    }
+
+    const pageNum = Number.parseInt(req.query.page ?? '1', 10);
+    const limitNum = Number.parseInt(req.query.limit ?? '20', 10);
+    const page = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
+    const limit = Number.isFinite(limitNum) && limitNum > 0 && limitNum <= 100 ? limitNum : 20;
     const offset = (page - 1) * limit;
-    
-    // Get photos with pagination
+
     const result = await pool.query(
-      `SELECT id, file_key, original_name, content_type, file_size, created_at, updated_at 
-       FROM photos 
-       WHERE user_id = $1 
-       ORDER BY created_at DESC 
+      `SELECT id, file_key, original_name, content_type, file_size, created_at, updated_at
+       FROM photos
+       WHERE user_id = $1
+       ORDER BY created_at DESC
        LIMIT $2 OFFSET $3`,
       [req.user.id, limit, offset]
     );
-    
-    // Get total count
+
     const countResult = await pool.query(
       'SELECT COUNT(*) FROM photos WHERE user_id = $1',
       [req.user.id]
     );
-    
-    const totalPhotos = parseInt(countResult.rows[0].count);
+
+    const totalPhotos = parseInt(countResult.rows[0].count, 10);
     const totalPages = Math.ceil(totalPhotos / limit);
-    
-    res.json({
+
+    return res.json({
       photos: result.rows,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage: page,
         totalPages,
         totalPhotos,
         hasNext: page < totalPages,
