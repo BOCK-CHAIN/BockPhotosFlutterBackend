@@ -137,12 +137,6 @@ export const getViewUrl = async (req, res, next) => {
 // List user's photos
 export const listPhotos = async (req, res, next) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({
-        error: { message: 'Access token required', statusCode: 401 }
-      });
-    }
-
     const pageNum = Number.parseInt(req.query.page ?? '1', 10);
     const limitNum = Number.parseInt(req.query.limit ?? '20', 10);
     const page = Number.isFinite(pageNum) && pageNum > 0 ? pageNum : 1;
