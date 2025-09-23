@@ -319,7 +319,16 @@ npm run dev
 
 - **Health Check:** `GET /health`
 - **Authentication:** `POST /api/auth/signup`, `POST /api/auth/login`
-- **Photos:** `GET /api/photos`, `POST /api/photos/upload-url`
+- **Photos:**
+  - `POST /api/photos/upload-url` Get presigned URL for S3 PUT (send filename, contentType, fileSize)
+  - `POST /api/photos` Finalize upload and persist metadata
+    - Request: `{ fileKey, originalName, contentType, fileSize }`
+    - Response: `{ photo: { id, file_key, original_name, content_type, file_size, created_at, url? } }`
+  - `GET /api/photos/view-url?key=<file_key>` Get presigned GET URL for viewing (if bucket is private)
+  - `GET /api/photos` List user photos
+  - `GET /api/photos/:id` Get specific photo
+  - `PUT /api/photos/:id` Update photo metadata
+  - `DELETE /api/photos/:id` Delete photo
 
 ## 🤝 Contributing
 

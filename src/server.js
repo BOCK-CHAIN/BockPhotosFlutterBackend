@@ -48,7 +48,7 @@ const startServer = async () => {
     }
     
     // Start HTTP server
-    server = app.listen(env.PORT, () => {
+    server = app.listen(env.PORT,'0.0.0.0', () => {
       console.log('\n🚀 Server started successfully');
       console.log(`📱 Environment: ${env.NODE_ENV}`);
       console.log(`🌐 Server running on port ${env.PORT}`);

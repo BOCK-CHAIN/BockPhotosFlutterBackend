@@ -51,6 +51,8 @@ app.get('/api', (req, res) => {
         base: '/api/photos',
         routes: [
           { method: 'POST', path: '/api/photos/upload-url', description: 'Get presigned URL for S3 upload' },
+          { method: 'POST', path: '/api/photos', description: 'Finalize photo upload (persist metadata)' },
+          { method: 'GET', path: '/api/photos/view-url', description: 'Get presigned URL for viewing photo' },
           { method: 'GET', path: '/api/photos', description: 'List user photos' },
           { method: 'GET', path: '/api/photos/:id', description: 'Get specific photo' },
           { method: 'PUT', path: '/api/photos/:id', description: 'Update photo metadata' },

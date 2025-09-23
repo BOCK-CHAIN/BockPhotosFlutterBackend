@@ -7,7 +7,8 @@ export const pool = new Pool({
   connectionString: env.DATABASE_URL,
   ssl: env.NODE_ENV === 'production' ? { 
     rejectUnauthorized: false, // Allow self-signed certificates (common with RDS)
-    sslmode: 'require'
+    sslmode: 'require',
+    checkServerIdentity: () => undefined // Skip hostname verification
   } : false,
   max: env.DB_POOL_SIZE,
   idleTimeoutMillis: env.DB_IDLE_TIMEOUT,

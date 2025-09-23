@@ -1,5 +1,6 @@
 import { pool } from '../config/db.js';
 import { s3Utils, validateS3Config } from '../config/s3.js';
+import { env } from '../config/env.js';
 
 // Get presigned URL for direct S3 upload
 export const getUploadUrl = async (req, res, next) => {
@@ -57,6 +58,77 @@ export const getUploadUrl = async (req, res, next) => {
       fileKey,
       expiresIn: 300
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Finalize photo upload: persist metadata after successful S3 PUT
+export const createPhoto = async (req, res, next) => {
+  try {
+    const { fileKey, originalName, contentType, fileSize } = req.body;
+
+    // Validate required fields
+    if (!fileKey || !originalName || !contentType || !fileSize) {
+      return res.status(400).json({
+        error: {
+          message: 'fileKey, originalName, contentType, and fileSize are required',
+          statusCode: 400
+        }
+      });
+    }
+
+    // Optional: basic content type guard (align with upload presign)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(contentType)) {
+      return res.status(400).json({
+        error: {
+          message: 'Invalid file type. Only images are allowed',
+          statusCode: 400
+        }
+      });
+    }
+
+    // Insert into DB
+    const insertResult = await pool.query(
+      `INSERT INTO photos (user_id, file_key, original_name, content_type, file_size, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       RETURNING id, file_key, original_name, content_type, file_size, created_at`,
+      [req.user.id, fileKey, originalName, contentType, fileSize]
+    );
+
+    const photo = insertResult.rows[0];
+
+    // Optional computed public URL if configured
+    if (env.PUBLIC_BUCKET_BASE_URL) {
+      photo.url = `${env.PUBLIC_BUCKET_BASE_URL.replace(/\/$/, '')}/${photo.file_key}`;
+    }
+
+    return res.status(201).json({ photo });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get presigned URL for viewing/downloading a photo (if using private bucket)
+export const getViewUrl = async (req, res, next) => {
+  try {
+    const { key } = req.query;
+
+    if (!key) {
+      return res.status(400).json({
+        error: { message: 'key is required', statusCode: 400 }
+      });
+    }
+
+    if (!validateS3Config()) {
+      return res.status(503).json({
+        error: { message: 'File service unavailable', statusCode: 503 }
+      });
+    }
+
+    const url = await s3Utils.getDownloadUrl(key, 3600);
+    return res.json({ url, expiresIn: 3600 });
   } catch (err) {
     next(err);
   }
